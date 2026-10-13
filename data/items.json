@@ -1,0 +1,17 @@
+[
+    {
+        "id": "1",
+        "name": "Item 1",
+        "description": "This is item 1"
+    },
+    {
+        "id": "2",
+        "name": "Item 2",
+        "description": "This is item 2"
+    },
+    {
+        "id": "45aa4e75-ad87-483b-843f-1f29855f5ccb",
+        "name": "Item novo",
+        "description": "Teste de POST"
+    }
+]
