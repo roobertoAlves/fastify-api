@@ -1,15 +1,12 @@
+let items = require("../Items");
 const { v4: uuidv4 } = require("uuid");
-const { readItemsFromFile, writeItemsToFile } = require("../utils/itemsStore");
 
 const getItems = (req, reply) => {
-  const items = readItemsFromFile();
-  return reply.send(items);
+  reply.send(items);
 };
 
 const getItem = (req, reply) => {
   const { id } = req.params;
-  const items = readItemsFromFile();
-
   const item = items.find((item) => item.id === id);
 
   if (!item) {
@@ -17,34 +14,39 @@ const getItem = (req, reply) => {
     return;
   }
 
-  return reply.send(item);
+  reply.send(item);
 };
 
 const addItem = (req, reply) => {
   const { name, description } = req.body;
-  const items = readItemsFromFile();
-
   const newItem = {
     id: uuidv4(),
     name,
     description,
   };
 
-  items.push(newItem);
-  writeItemsToFile(items);
+  items = [...items, newItem];
+  reply.code(201).send(newItem);
+};
 
-  return reply.code(201).send(newItem);
+const deleteItem = (req, reply) => {
+  const { id } = req.params;
+
+  items = items.filter((item) => item.id !== id);
+
+  reply.send({ message: `Item with id ${id} deleted successfully` });
 };
 
 const updateItem = (req, reply) => {
   const { id } = req.params;
   const { name, description } = req.body;
-  const items = readItemsFromFile();
 
-  const index = items.findIndex((item) => item.id === id);
+  const existingItem = items.find((item) => item.id === id);
 
-  if (index === -1) {
-    return reply.code(404).send({ error: "Item not found" });
+  if (!existingItem) {
+    return reply.code(404).send({
+      error: "Item not found",
+    });
   }
 
   const updatedItem = {
@@ -53,26 +55,9 @@ const updateItem = (req, reply) => {
     ...(description !== undefined && { description }),
   };
 
-  items[index] = updatedItem;
-  writeItemsToFile(items);
+  items = items.map((item) => (item.id === id ? updatedItem : item));
 
   return reply.code(200).send(updatedItem);
-};
-
-const deleteItem = (req, reply) => {
-  const { id } = req.params;
-  const items = readItemsFromFile();
-
-  const index = items.findIndex((item) => item.id === id);
-
-  if (index === -1) {
-    return reply.code(404).send({ error: "Item not found" });
-  }
-
-  const updatedItems = items.filter((item) => item.id !== id);
-  writeItemsToFile(updatedItems);
-
-  return reply.send({ message: `Item with id ${id} deleted successfully` });
 };
 
 module.exports = {
